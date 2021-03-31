@@ -14,8 +14,18 @@ def get_titles_from_search_results(filename):
 
     [('Book title 1', 'Author 1'), ('Book title 2', 'Author 2')...]
     """
-
-    pass
+     with open("search_results.htm", encoding="utf-8") as f:
+        data = f.read()
+        soup = BeautifulSoup(data, 'html.parser')
+        titles = soup.find_all('a', class_='bookTitle')
+        authors = soup.find_all('a', class_='authorName')
+        count = 0
+        ret_list = []
+        while count < len(titles):
+            ret_list.append((titles[count].get_text().strip(),
+                            authors[count].get_text().strip()))
+            count += 1
+        return(ret_list)
 
 
 def get_search_links():
@@ -32,7 +42,15 @@ def get_search_links():
 
     """
 
-    pass
+    r = requests.get(
+        "https://www.goodreads.com/search?q=fantasy&qid=NwUsLiA2Nc")
+    soup = BeautifulSoup(r.content, 'html.parser')
+    ret_list = []
+    append_url = "https://www.goodreads.com"
+    bookTitle = soup.find_all('a', class_='bookTitle')
+    for link in range(10):
+        ret_list.append(append_url + bookTitle[link].get('href'))
+    return ret_list
 
 
 def get_book_summary(book_url):
