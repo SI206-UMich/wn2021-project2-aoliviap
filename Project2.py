@@ -14,7 +14,7 @@ def get_titles_from_search_results(filename):
 
     [('Book title 1', 'Author 1'), ('Book title 2', 'Author 2')...]
     """
-     with open("search_results.htm", encoding="utf-8") as f:
+    with open("search_results.htm", 'r') as f:
         data = f.read()
         soup = BeautifulSoup(data, 'html.parser')
         titles = soup.find_all('a', class_='bookTitle')
@@ -25,7 +25,7 @@ def get_titles_from_search_results(filename):
             ret_list.append((titles[count].get_text().strip(),
                             authors[count].get_text().strip()))
             count += 1
-        return(ret_list)
+        return ret_list
 
 
 def get_search_links():
@@ -48,9 +48,11 @@ def get_search_links():
     ret_list = []
     append_url = "https://www.goodreads.com"
     bookTitle = soup.find_all('a', class_='bookTitle')
-    for link in range(10):
-        ret_list.append(append_url + bookTitle[link].get('href'))
-    return ret_list
+    link_check = "/book/show/"
+    for link in bookTitle:
+        if bookTitle[link].get('href').startswith(link_check):
+            ret_list.append(append_url + bookTitle[link].get('href'))
+    return ret_list[:10]
 
 
 def get_book_summary(book_url):
@@ -72,11 +74,7 @@ def get_book_summary(book_url):
     title = soup.find('h1', id="bookTitle").get_text().strip()
     author = soup.find('span', itemprop='name').get_text().strip()
     pages = soup.find('span', itemprop='numberOfPages').get_text().strip()
-    nums = '0123456789'
-    page_num = ''
-    for char in pages:
-        if char in nums:
-            page_num += char
+    page_num = pages[:-6]
     return (title, author, int(page_num))
 
 
@@ -91,10 +89,9 @@ def summarize_best_books(filepath):
     ("Fiction", "The Testaments (The Handmaid's Tale, #2)", "https://www.goodreads.com/choiceawards/best-fiction-books-2020") 
     to your list of tuples.
     """
-    with open(filepath) as f:
+    with open(filepath, 'r') as f:
         data = f.read()
         soup = BeautifulSoup(data, 'html.parser')
-        #print(soup.find('div', class_='category clearFix'))
         tup_list = []
         for item in soup.find_all('div', class_='category clearFix'):
             category = item.a.get_text().strip()
@@ -123,8 +120,11 @@ def write_csv(data, filename):
 
     This function should not return anything.
     """
-    pass
-
+    with open(filename, 'w') as f:
+        csv_writer= csv.writer(f)
+        csv_writer.writerow(['Book title', 'Author Name'])
+        for book in data:
+            csv_writer.writerow(book)
 
 def extra_credit(filepath):
     """
@@ -152,7 +152,8 @@ class TestCases(unittest.TestCase):
         # check that the first book and author tuple is correct (open search_results.htm and find it)
 
         # check that the last title is correct (open search_results.htm and find it)
-
+        pass
+    
     def test_get_search_links(self):
         # check that TestCases.search_urls is a list
 
@@ -161,8 +162,9 @@ class TestCases(unittest.TestCase):
 
         # check that each URL in the TestCases.search_urls is a string
         # check that each URL contains the correct url for Goodreads.com followed by /book/show/
+        pass
 
-
+    
     def test_get_book_summary(self):
         # create a local variable – summaries – a list containing the results from get_book_summary()
         # for each URL in TestCases.search_urls (should be a list of tuples)
@@ -178,6 +180,7 @@ class TestCases(unittest.TestCase):
             # check that the third element in the tuple, i.e. pages is an int
 
             # check that the first book in the search has 337 pages
+            pass
 
 
     def test_summarize_best_books(self):
@@ -192,12 +195,15 @@ class TestCases(unittest.TestCase):
         # check that the first tuple is made up of the following 3 strings:'Fiction', "The Midnight Library", 'https://www.goodreads.com/choiceawards/best-fiction-books-2020'
 
         # check that the last tuple is made up of the following 3 strings: 'Picture Books', 'Antiracist Baby', 'https://www.goodreads.com/choiceawards/best-picture-books-2020'
+        pass
 
 
     def test_write_csv(self):
         # call get_titles_from_search_results on search_results.htm and save the result to a variable
+        data = get_titles_from_search_results('search_result.htm')
 
         # call write csv on the variable you saved and 'test.csv'
+        write_csv(data, 'test.csv')
 
         # read in the csv that you wrote (create a variable csv_lines - a list containing all the lines in the csv you just wrote to above)
 
